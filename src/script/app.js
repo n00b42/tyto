@@ -22,7 +22,6 @@ Tyto.module('Views', TytoViews);
 Tyto.module('Utils', TytoUtils);
 Tyto.module('Suggestions', TytoSuggestions);
 
-Tyto.Boards = new Tyto.Models.BoardCollection();
 Tyto.Columns = new Tyto.Models.ColumnCollection();
 Tyto.Tasks = new Tyto.Models.TaskCollection();
 Tyto.ActiveBoard = new Tyto.Models.Board();
@@ -67,18 +66,4 @@ Tyto.on('start', function() {
 });
 
 
-/*
-  In a scenario where we are interacting with a live backend, expect to use
-  something similar to;
-
-    Tyto.boardList.fetch().done (data) ->
-      Tyto.start()
-
-  However, as we are only loading from localStorage, we can reset collections
-  based on what is stored in localStorage.
-
-  For this we use a utility function implementing in the Utils module.
- */
-
-Tyto.Utils.load(window.localStorage);
 Tyto.start();

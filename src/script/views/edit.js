@@ -129,7 +129,7 @@ const EditView = Backbone.Marionette.ItemView.extend({
     const view = this;
     const save = function() {
       delete view.model.attributes.id;
-      Tyto.Tasks.create(view.model.attributes);
+      Tyto.ActiveTasks.create(view.model.attributes);
       Tyto.navigate('/board/' + view.options.board.id, true);
     };
     if (view.options.columns.length !== 0 && !view.selectedColumnId) {
@@ -152,7 +152,7 @@ const EditView = Backbone.Marionette.ItemView.extend({
     if (newColumnId !== view.model.get('columnId')) {
       view.ui.column.removeClass(Tyto.SELECTED_CLASS);
       e.target.classList.add(Tyto.SELECTED_CLASS);
-      const newOrdinal = Tyto.Tasks.where({
+      const newOrdinal = Tyto.ActiveTasks.where({
         columnId: newColumnId
       }).length + 1;
       view.ui.columnLabel.text(e.target.textContent);

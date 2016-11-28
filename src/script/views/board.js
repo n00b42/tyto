@@ -8,11 +8,6 @@ const BoardView = Backbone.Marionette.CompositeView.extend({
   template: function(args) {
     return Tyto.TemplateStore.board(args);
   },
-  templateHelpers: function() {
-    return {
-      boards: Tyto.Boards
-    };
-  },
   childView: Column,
   childViewContainer: function() {
     return this.domAttributes.CHILD_VIEW_CONTAINER_CLASS;
@@ -31,10 +26,10 @@ const BoardView = Backbone.Marionette.CompositeView.extend({
     addEntity      : '.tyto-board__add-entity',
     primaryActions : '.tyto-board__actions',
     boardMenu      : '.tyto-board__menu',
-    boardSelect    : '.tyto-board__selector__menu',
     addColumn      : '.tyto-board__add-column',
     addTask        : '.tyto-board__super-add',
     deleteBoard    : '.tyto-board__delete-board',
+    backHomeBtn    : '.tyto-board__back-home',
     wipeBoard      : '.tyto-board__wipe-board',
     emailBoard     : '.tyto-board__email-board',
     emailer        : '.tyto-board__emailer',
@@ -61,9 +56,6 @@ const BoardView = Backbone.Marionette.CompositeView.extend({
       {
         el: view.ui.boardMenu[0],
         component: 'MaterialMenu'
-      }, {
-        el: view.ui.boardSelect[0],
-        component: 'MaterialMenu'
       }
     ];
   },
@@ -78,6 +70,7 @@ const BoardView = Backbone.Marionette.CompositeView.extend({
     'click @ui.addTask'    : 'addNewTask',
     'click @ui.deleteBoard': 'deleteBoard',
     'click @ui.wipeBoard'  : 'wipeBoard',
+    'click @ui.backHomeBtn': 'backHome',
     'click @ui.emailBoard' : 'emailBoard',
     'blur @ui.boardName'   : 'saveBoardName'
   },
@@ -187,6 +180,9 @@ const BoardView = Backbone.Marionette.CompositeView.extend({
     const emailContent = Tyto.Utils.getEmailContent(view.model);
     this.ui.emailer.attr('href', emailContent);
     this.ui.emailer[0].click();
+  },
+  backHome: function() {
+    Tyto.navigate('/', true);
   }
 });
 

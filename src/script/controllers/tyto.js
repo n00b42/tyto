@@ -4,7 +4,7 @@
 const AppCtrl = function(AppCtrl, App, Backbone, Marionette) {
   AppCtrl.Router = Marionette.AppRouter.extend({
     appRoutes: {
-      'board/:board'                   : 'showBoardView',
+      'board/:board'                   : 'initBoard',
       'board/:board/task/:task'        : 'showEditView',
       'board/:board/task/:task?:params': 'showEditView',
       '*path'                          : 'showSelectView'
@@ -12,61 +12,90 @@ const AppCtrl = function(AppCtrl, App, Backbone, Marionette) {
   });
   AppCtrl.Controller = Marionette.Controller.extend({
     start: function() {
-      this.showMenu();
-      if (window.localStorage && !window.localStorage.tyto) {
-        this.showCookieBanner();
-      }
     },
     showSelectView: function() {
-      Tyto.SelectView = new App.Views.Select({
-        collection: Tyto.Boards
-      });
+      Tyto.SelectView = new App.Views.Select({});
       Tyto.RootView.showChildView('Content', Tyto.SelectView);
     },
-    showMenu: function() {
-      Tyto.MenuView = new App.Views.Menu();
-      Tyto.RootView.showChildView('Menu', Tyto.MenuView);
+    initBoard: function(id) {
+      Tyto.RootView.$el.addClass(Tyto.LOADING_CLASS);
+      
+      let parentThis = this;
+
+      let model = new Tyto.Models.Board({id: id});
+      model.fetch()
+      // Board exists
+      .done( function() {
+        Tyto.ActiveBoard = model;
+        
+        let columnsModel = new Tyto.Models.ColumnCollection();
+        columnsModel.boardId = id;
+        let tasksModel = new Tyto.Models.TaskCollection();
+        tasksModel.boardId = id;
+        
+        $.when(columnsModel.fetch(),tasksModel.fetch())
+        .done(function() {
+          Tyto.ActiveCols.reset( columnsModel.where({ boardId: model.id }) );
+          Tyto.ActiveTasks.reset( tasksModel.where({ boardId: model.id }) );
+	  parentThis.showBoardView();
+	});
+      })
+      // Board does not exist
+      // TODO: other failure sources (connection failed ...), check for 404!
+      .error( function() {
+        let newBoard = new Tyto.Models.Board({id: id, title: 'Tutorial Title (Change Me)'});
+        newBoard.save(null, {type:'POST'})
+        .done(function() {
+          Tyto.ActiveBoard = newBoard;
+          
+          let columnsModel = new Tyto.Models.ColumnCollection();
+          columnsModel.boardId = id;
+          let tasksModel = new Tyto.Models.TaskCollection();
+          tasksModel.boardId = id;
+          
+          $.when(columnsModel.fetch(),tasksModel.fetch())
+          .done(function() {
+            Tyto.ActiveCols.reset( columnsModel.where({ boardId: newBoard.id }) );
+            Tyto.ActiveTasks.reset( tasksModel.where({ boardId: newBoard.id }) );
+
+            $.getJSON(Tyto.INTRO_JSON_SRC, function(data) {
+              for (var prop in data) {
+                let entity;
+                if(data.hasOwnProperty(prop) && (prop.indexOf('tyto--column-') !== -1)) {
+                  entity = JSON.parse(data[prop]);
+                  entity.boardId = newBoard.id;
+                  Tyto.ActiveCols.create(entity, {type:'POST'});
+                }
+                if(data.hasOwnProperty(prop) && (prop.indexOf('tyto--task-') !== -1)) {
+                  entity = JSON.parse(data[prop]);
+                  entity.boardId = newBoard.id;
+                  Tyto.ActiveTasks.create(entity, {type:'POST'});
+                }
+              }
+              parentThis.showBoardView();
+              Tyto.RootView.$el.removeClass(Tyto.LOADING_CLASS);
+            }); // - getJSON          
+	  }); // - done
+        }); // - done
+      }); // - error
+      
     },
-    showCookieBanner: function() {
-      /*
-        Show cookie banner by creating a temporary region and showing
-        the view.
-       */
-      Tyto.RootView.$el.prepend($('<div id="cookie-banner"></div>'));
-      Tyto.RootView.addRegion('Cookie', '#cookie-banner');
-      Tyto.CookieBannerView = new App.Views.CookieBanner();
-      Tyto.RootView.showChildView('Cookie', Tyto.CookieBannerView);
-    },
-    showBoardView: function(id) {
-      let cols, model, tasks;
-      Tyto.ActiveBoard = model = Tyto.Boards.get(id);
-      if (model) {
-        cols = Tyto.Columns.where({
-          boardId: model.id
-        });
-        tasks = Tyto.Tasks.where({
-          boardId: model.id
-        });
-        Tyto.ActiveTasks.reset(tasks);
-        Tyto.ActiveCols.reset(cols);
-        Tyto.BoardView = new App.Views.Board({
-          model: model,
-          collection: Tyto.ActiveCols,
-          options: {
-            tasks: Tyto.ActiveTasks
-          }
-        });
-        App.RootView.showChildView('Content', Tyto.BoardView);
-      } else {
-        App.navigate('/', true);
-      }
+    showBoardView: function() {
+      let model;
+      model = Tyto.ActiveBoard;
+      Tyto.BoardView = new App.Views.Board({
+        model: model,
+        collection: Tyto.ActiveCols,
+        options: {
+          tasks: Tyto.ActiveTasks
+        }
+      });
+      App.RootView.showChildView('Content', Tyto.BoardView);
     },
     showEditView: function(bId, tId, params) {
       let taskToEdit;
-      const board = Tyto.Boards.get(bId);
-      const columns = Tyto.Columns.where({
-        boardId: bId
-      });
+      const board = Tyto.ActiveBoard;
+      const columns = Tyto.ActiveCols.where({ boardId: bId });
       let parentColumn;
       let isNew = false;
       if (params) {
@@ -79,7 +108,7 @@ const AppCtrl = function(AppCtrl, App, Backbone, Marionette) {
           });
         }
       } else {
-        taskToEdit = Tyto.Tasks.get(tId);
+        taskToEdit = Tyto.ActiveTasks.get(tId);
       }
       if (taskToEdit && board) {
         Tyto.EditView = new App.Views.Edit({

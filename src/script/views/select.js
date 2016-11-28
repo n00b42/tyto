@@ -7,14 +7,11 @@ const SelectView = Backbone.Marionette.ItemView.extend({
     return this.domAttributes.VIEW_CLASS;
   },
   ui: {
-    add          : '.tyto-select__add-board',
-    load         : '.tyto-select__load-intro-board',
-    boardSelector: '.tyto-select__board-selector'
+    loadCreateIdInp : '.tyto-boardid-input',
+    loadCreateIdBtn : '.tyto-boardid-button'
   },
   events: {
-    'click @ui.add'           : 'addBoard',
-    'change @ui.boardSelector': 'showBoard',
-    'click @ui.load'          : 'loadIntro'
+    'click @ui.loadCreateIdBtn' : 'loadCreateId',
   },
   domAttributes: {
     VIEW_CLASS: 'tyto-select'
@@ -22,28 +19,8 @@ const SelectView = Backbone.Marionette.ItemView.extend({
   collectionEvents: {
     'all': 'render'
   },
-  addBoard: function() {
-    this.showBoard(Tyto.Boards.create().id);
-  },
-  loadIntro: function() {
-    const view = this;
-    let id;
-    Tyto.RootView.$el.addClass(Tyto.LOADING_CLASS);
-    $.getJSON(Tyto.INTRO_JSON_SRC, function(d) {
-      Tyto.RootView.$el.removeClass(Tyto.LOADING_CLASS);
-      Tyto.Utils.load(d, true, false);
-      _.forOwn(d, function(val, key) {
-        if (key.indexOf('tyto--board-') !== -1) {
-          id = JSON.parse(val).id;
-        }
-      });
-      view.showBoard(id);
-    });
-  },
-  showBoard: function(id) {
-    if (typeof id !== 'string') {
-      id = this.ui.boardSelector.val();
-    }
+  loadCreateId: function() {
+    let id = this.ui.loadCreateIdInp.val();
     Tyto.navigate('board/' + id, {
       trigger: true
     });

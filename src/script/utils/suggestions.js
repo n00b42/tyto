@@ -28,7 +28,7 @@ const Suggestions = function(Suggestions, App, Backbone, Marionette) {
     const edit = view.ui.editDescription;
     const props = view.domAttributes;
     const suggestions = view.ui.suggestions;
-    let collection = Tyto.Boards.models.concat(Tyto.Tasks.models);
+    let collection = Tyto.ActiveTasks.models;
     collection = (filterString) ? collection.filter(filterByTerm) : collection;
     const markup = Tyto.TemplateStore.filterList({
       models: collection.slice(0, 4)
