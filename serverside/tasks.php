@@ -32,9 +32,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 }
 
 if ($_SERVER['REQUEST_METHOD'] == "PUT"){
-  $sql = "UPDATE tasks SET boardId = :boardId, columnId = :columnId, title = :title, description = :description, ordinal = :ordinal, color = :color, timeSpent = :timeSpent WHERE id = :id";
+  $sql = "UPDATE tasks SET columnId = :columnId, title = :title, description = :description, ordinal = :ordinal, color = :color, timeSpent = :timeSpent WHERE boardId = :boardId AND id = :id";
   $query = $db->prepare($sql);
-  $query->execute( [":boardId"=>$data->boardId, ":columnId"=>$data->columnId, ":title"=>$data->title, ":description"=>$data->description, ":ordinal"=>$data->ordinal, ":color"=>$data->color, ":timeSpent"=>serialize($data->timeSpent), ":id"=>$data->id] );
+  $query->execute( [":columnId"=>$data->columnId, ":title"=>$data->title, ":description"=>$data->description, ":ordinal"=>$data->ordinal, ":color"=>$data->color, ":timeSpent"=>serialize($data->timeSpent), ":boardId"=>$data->boardId, ":id"=>$data->id] );
 }
  
 if ($_SERVER['REQUEST_METHOD'] == "DELETE"){

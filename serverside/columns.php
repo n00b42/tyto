@@ -30,9 +30,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 }
 
 if ($_SERVER['REQUEST_METHOD'] == "PUT"){
-  $sql = "UPDATE columns SET boardId = :boardId, title = :title, ordinal = :ordinal WHERE id = :id";
+  $sql = "UPDATE columns SET title = :title, ordinal = :ordinal WHERE boardId = :boardId AND id = :id";
   $query = $db->prepare($sql);
-  $query->execute( [":boardId"=>$data->boardId, ":title"=>$data->title, ":ordinal"=>$data->ordinal, ":id"=>$data->id] );
+  $query->execute( [":title"=>$data->title, ":ordinal"=>$data->ordinal, ":boardId"=>$data->boardId, ":id"=>$data->id] );
 }
  
 if ($_SERVER['REQUEST_METHOD'] == "DELETE"){
