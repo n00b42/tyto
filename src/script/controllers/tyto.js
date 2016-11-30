@@ -16,6 +16,7 @@ const AppCtrl = function(AppCtrl, App, Backbone, Marionette) {
     showSelectView: function() {
       Tyto.SelectView = new App.Views.Select({});
       Tyto.RootView.showChildView('Content', Tyto.SelectView);
+      $(document).attr('title', 'Tyto');
     },
     initBoard: function(id) {
       Tyto.RootView.$el.addClass(Tyto.LOADING_CLASS);
@@ -81,10 +82,10 @@ const AppCtrl = function(AppCtrl, App, Backbone, Marionette) {
       
     },
     showBoardView: function() {
-      let model;
-      model = Tyto.ActiveBoard;
+      $(document).attr('title', Tyto.ActiveBoard.attributes['title']);
+      
       Tyto.BoardView = new App.Views.Board({
-        model: model,
+        model: Tyto.ActiveBoard,
         collection: Tyto.ActiveCols,
         options: {
           tasks: Tyto.ActiveTasks
