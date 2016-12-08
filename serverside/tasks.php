@@ -37,10 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] == "PUT"){
   $query->execute( [":columnId"=>$data->columnId, ":title"=>$data->title, ":description"=>$data->description, ":ordinal"=>$data->ordinal, ":color"=>$data->color, ":timeSpent"=>serialize($data->timeSpent), ":boardId"=>$data->boardId, ":id"=>$data->id] );
 }
  
-if ($_SERVER['REQUEST_METHOD'] == "DELETE"){
- $sql = "DELETE FROM tasks WHERE id = :id";
+if ($_SERVER['REQUEST_METHOD'] == "DELETE" && isset($_GET['boardId']) && isset($_GET['id'])){
+ $sql = "DELETE FROM tasks WHERE boardId = :boardId AND id = :id";
  $query = $db->prepare($sql);
- $query->execute( [":id"=>$_GET['id']] );
+ $query->execute( [":boardId"=>$_GET['boardId'],":id"=>$_GET['id']] );
 }
 
 ?>

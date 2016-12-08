@@ -1,8 +1,10 @@
 const Models = function(Models, App, Backbone) {
   
+  Models.URL = "/";
+
   Models.Board = Backbone.Model.extend({
     url: function() {
-      return this.id ? "boards.php?id=" + this.id : "boards.php";
+      return Models.URL + "boards.php?id=" + this.id;
     },
     defaults: {
       title: 'New Board'
@@ -11,7 +13,7 @@ const Models = function(Models, App, Backbone) {
   
   Models.Column = Backbone.Model.extend({
     url: function() {
-      return this.id ? "columns.php?id=" + this.id : "columns.php";
+      return this.id ? Models.URL + "columns.php?boardId=" + this.attributes.boardId + "&id=" + this.id : Models.URL + "columns.php?boardId=" + this.attributes.boardId;
     },
     defaults: {
       title  : 'New Column',
@@ -21,13 +23,13 @@ const Models = function(Models, App, Backbone) {
   Models.ColumnCollection = Backbone.Collection.extend({
     model       : Models.Column,
     url: function() {
-      return "columns.php?boardId=" + this.boardId;
+      return Models.URL + "columns.php?boardId=" + this.boardId;
     }
   });
   
   Models.Task = Backbone.Model.extend({
     url: function() {
-      return this.id ? "tasks.php?id=" + this.id : "tasks.php";
+      return this.id ? Models.URL + "tasks.php?boardId=" + this.attributes.boardId + "&id=" + this.id : Models.URL + "tasks.php?boardId=" + this.attributes.boardId;
     },
     defaults: {
       title      : 'New Todo',
@@ -40,10 +42,11 @@ const Models = function(Models, App, Backbone) {
       }
     }
   });
+
   Models.TaskCollection = Backbone.Collection.extend({
     model       : Models.Task,
     url: function() {
-      return "tasks.php?boardId=" + this.boardId;
+      return Models.URL + "tasks.php?boardId=" + this.boardId;
     }
   });
 
